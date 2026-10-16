@@ -1,0 +1,1 @@
+---\ntitle: Logger\n---\nBody text here
