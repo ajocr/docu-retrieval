@@ -36,6 +36,11 @@ def load_html(path):
 
 LOADERS = {".txt": load_txt, ".md": load_md, ".html": load_html}
 
+# files that build the docs site rather than document Powertools (paths relative to docs/)
+EXCLUDE = {"requirements.txt", "overrides/main.html", "diagram_src/cicd_steps.md"}
+# includes/ snippets get pasted into other pages at build time, so their text is already indexed there
+EXCLUDE_DIRS = ("includes/",)
+
 HEADING = re.compile(r"^#{1,6}\s")
 
 def split_sections(text):
@@ -73,6 +78,55 @@ def is_boilerplate(body):
     has_directive = any(l.lstrip().startswith(":::") for l in lines)
     return all(l.strip().startswith(prefixes) or (has_directive and l.startswith((" ", "\t"))) for l in lines)
 
+# all-MiniLM-L6-v2 stops reading at 256 tokens, which is roughly 200 words of prose
+MAX_WORDS = 200
+
+def split_long(body, max_words=MAX_WORDS):
+    # sections short enough for the model to read whole stay as one chunk
+    if len(body.split()) <= max_words:
+        return [body]
+
+    # 1. break the body into paragraphs on blank lines, keeping ``` code blocks in one piece
+    paragraphs = []
+    para_lines = []
+    in_code = False
+    for line in body.split("\n"):
+        if line.lstrip().startswith("```"):
+            in_code = not in_code
+        if not in_code and not line.strip():
+            if para_lines:
+                paragraphs.append("\n".join(para_lines))
+                para_lines = []
+        else:
+            para_lines.append(line)
+    if para_lines:
+        paragraphs.append("\n".join(para_lines))
+
+    # 2. pack paragraphs into chunks of up to max_words, no overlap
+    chunks = []
+    packed = []
+    packed_words = 0
+    for para in paragraphs:
+        words = len(para.split())
+        if words > max_words:
+            # one paragraph is too long by itself: close the current chunk, then cut it into fixed word windows
+            if packed:
+                chunks.append("\n\n".join(packed))
+                packed, packed_words = [], 0
+            para_words = para.split()
+            for i in range(0, len(para_words), max_words):
+                chunks.append(" ".join(para_words[i:i + max_words]))
+            continue
+        if packed and packed_words + words > max_words:
+            chunks.append("\n\n".join(packed))
+            packed, packed_words = [], 0
+        packed.append(para)
+        packed_words += words
+    if packed:
+        chunks.append("\n\n".join(packed))
+
+    return chunks
+
 def ingest(docs_dir):
     records = []
     # 1. walk docs_dir for files
@@ -88,8 +142,10 @@ def ingest(docs_dir):
         if not path.is_file() or loader is None:
             continue
 
-        text = loader(path)
         source = path.relative_to(docs_dir).as_posix()
+        if source in EXCLUDE or source.startswith(EXCLUDE_DIRS):
+            continue
+        text = loader(path)
 
         chunk_index = 0
         for section, body in split_sections(text):
