@@ -1,2 +1,4 @@
 beautifulsoup4==4.15.0
 chromadb==1.5.9
+anthropic==2.1.0
+python-dotenv==1.2.4

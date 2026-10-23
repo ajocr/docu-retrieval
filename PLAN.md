@@ -42,4 +42,5 @@
 - Step 2 done: 1,038 chunks indexed in `rag/chroma_db/` (cosine, built-in MiniLM embedder) in ~9s.
 - Test query "How do I add a correlation ID to my logs?" returned 3 core/logger.md correlation-ID chunks (distance 0.38-0.45).
 - Step 3: `search(question, k=3)` in rag/search.py returns id, source, section, text, score (cosine similarity).
-- Next: choose the LLM, then build the RAG prompt.
+- LLM chosen: Claude Haiku 5.5. Prompt design chosen: numbered [1] [2] [3] labels, exact "I don't know based on the Powertools docs." refusal (see CLAUDE.md). anthropic + python-dotenv installed; key loads from .env.
+- Next: create rag/answer.py with SYSTEM_PROMPT + build_context(hits); print the prompt for the test question before calling Claude. Draft system prompt wording is pending approval.

@@ -17,7 +17,7 @@ I am rebuilding my coding skills and I am on a job-application deadline.
 ## Stack
 
 Python 3 on Windows (use `pathlib`), BeautifulSoup, `all-MiniLM-L6-v2` embeddings,
-ChromaDB, Streamlit. LLM and deployment target: TBD.
+ChromaDB, Streamlit. LLM: Claude Haiku 5.5 (`claude-haiku-5-5`) via the `anthropic` Python SDK, chosen for cost; compare against Opus 5.5 in the eval if quality looks weak. Deployment target: TBD.
 
 ## Decisions already made
 
@@ -25,6 +25,7 @@ ChromaDB, Streamlit. LLM and deployment target: TBD.
 - Chunk record fields: `id` (`source#chunk_index`), `source` (path relative to docs/), `section`, `chunk_index` (0-based per file, kept chunks only), `text`.
 - Embeddings use Chroma's built-in `DefaultEmbeddingFunction` (all-MiniLM-L6-v2 via ONNX, no PyTorch). Use the same function for chunks and queries.
 - ChromaDB is stored in `rag/chroma_db/` (git-ignored, rebuilt by `index.py`). Each run of `index.py` deletes and recreates the collection. The collection uses cosine distance. Search results report `score` as cosine similarity (1 - distance, higher is better).
+- RAG prompt: retrieved chunks are numbered `[1] [2] [3]` with source and section; Claude answers only from them, cites with `[n]`, and replies exactly "I don't know based on the Powertools docs." when the context doesn't answer the question. Plain-text output.
 - `#` lines inside fenced code blocks are not headings.
 - Skip a chunk if every non-blank line starts with `--8<--`, `:::`, `<!--`, or a code fence. Indented lines under a `:::` directive (its options) also count as boilerplate. Log how many were skipped.
 - Code samples are pulled in by `--8<--` includes and are not indexed yet. List this under known limitations.
