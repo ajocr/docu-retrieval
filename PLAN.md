@@ -8,12 +8,12 @@
   - Header-based sections; sections over 200 words are packed by paragraph (no overlap). 1,038 chunks, average 83 words, max 200. 64 boilerplate sections skipped.
 
 ## Step 2: Generate embeddings and index in ChromaDB
-- [ ] Use the all-MiniLM-L6-v2 sentence-transformer model to generate embeddings for each chunk.
-- [ ] Index chunks in ChromaDB with their text, embeddings, metadata, and unique chunk IDs.
-- [ ] Confirm the index supports a full re-run from scratch and verify retrieval with a test query.
+- [x] Use the all-MiniLM-L6-v2 sentence-transformer model to generate embeddings for each chunk.
+- [x] Index chunks in ChromaDB with their text, embeddings, metadata, and unique chunk IDs.
+- [x] Confirm the index supports a full re-run from scratch and verify retrieval with a test query.
 
 ## Step 3: Build the RAG answer generation pipeline
-- [ ] Implement a semantic search function that retrieves the top 3 chunks for a user question.
+- [x] Implement a semantic search function that retrieves the top 3 chunks for a user question.
 - [ ] Build a RAG prompt instructing the LLM to answer using only retrieved context and cite sources with bracketed labels.
 - [ ] Create the Streamlit interface with a question input, generated answer, source list, and expandable retrieved context.
 
@@ -39,4 +39,7 @@
 
 ## Current status
 - Step 1 done: `chunks.jsonl` has 1,038 chunks from 54 files (average 83 words).
-- Next: Step 2, embed chunks with all-MiniLM-L6-v2 and index them in ChromaDB.
+- Step 2 done: 1,038 chunks indexed in `rag/chroma_db/` (cosine, built-in MiniLM embedder) in ~9s.
+- Test query "How do I add a correlation ID to my logs?" returned 3 core/logger.md correlation-ID chunks (distance 0.38-0.45).
+- Step 3: `search(question, k=3)` in rag/search.py returns id, source, section, text, score (cosine similarity).
+- Next: choose the LLM, then build the RAG prompt.

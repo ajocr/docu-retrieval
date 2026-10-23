@@ -24,7 +24,7 @@ ChromaDB, Streamlit. LLM and deployment target: TBD.
 - Chunking is header-based, with a fixed-size fallback for long sections: `split_long` packs whole paragraphs up to 200 words, with no overlap. Judge it by SourceHitRate@3 on the eval set and record the result in EVALUATION.md.
 - Chunk record fields: `id` (`source#chunk_index`), `source` (path relative to docs/), `section`, `chunk_index` (0-based per file, kept chunks only), `text`.
 - Embeddings use Chroma's built-in `DefaultEmbeddingFunction` (all-MiniLM-L6-v2 via ONNX, no PyTorch). Use the same function for chunks and queries.
-- ChromaDB is stored in `rag/chroma_db/` (git-ignored, rebuilt by `index.py`). Each run of `index.py` deletes and recreates the collection. The collection uses cosine distance.
+- ChromaDB is stored in `rag/chroma_db/` (git-ignored, rebuilt by `index.py`). Each run of `index.py` deletes and recreates the collection. The collection uses cosine distance. Search results report `score` as cosine similarity (1 - distance, higher is better).
 - `#` lines inside fenced code blocks are not headings.
 - Skip a chunk if every non-blank line starts with `--8<--`, `:::`, `<!--`, or a code fence. Indented lines under a `:::` directive (its options) also count as boilerplate. Log how many were skipped.
 - Code samples are pulled in by `--8<--` includes and are not indexed yet. List this under known limitations.
