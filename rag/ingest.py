@@ -154,21 +154,27 @@ def ingest(docs_dir):
             if is_boilerplate(body):
                 skipped += 1
                 continue
-            records.append({
+            for piece in split_long(body.strip()):
+                records.append({
                 "id": f"{source}#{chunk_index}",
                 "source": source,
                 "section": section,
                 "chunk_index": chunk_index,
-                "text": body.strip(),
-            })
-            chunk_index += 1
+                "text": piece,
+                })
+                chunk_index += 1
 
     print(f"skipped {skipped} boilerplate chunks")
     return records
 
 if __name__ == "__main__":
-    records = ingest("docs")
-    with open("chunks.jsonl", "w", encoding="utf-8") as f:
+    # paths are relative to this file, so the script works from the project root or from rag/
+    here = Path(__file__).parent
+    records = ingest(here / "docs")
+    with open(here / "chunks.jsonl", "w", encoding="utf-8") as f:
         for record in records:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     print(f"wrote {len(records)} records to chunks.jsonl")
+
+    word_counts = [len(r["text"].split()) for r in records]
+    print(f"average chunk size: {sum(word_counts) / len(word_counts):.0f} words (max {max(word_counts)})")

@@ -21,8 +21,10 @@ ChromaDB, Streamlit. LLM and deployment target: TBD.
 
 ## Decisions already made
 
-- Chunking is header-based, with a fixed-size fallback for long sections (not built yet).
+- Chunking is header-based, with a fixed-size fallback for long sections: `split_long` packs whole paragraphs up to 200 words, with no overlap. Judge it by SourceHitRate@3 on the eval set and record the result in EVALUATION.md.
 - Chunk record fields: `id` (`source#chunk_index`), `source` (path relative to docs/), `section`, `chunk_index` (0-based per file, kept chunks only), `text`.
+- Embeddings use Chroma's built-in `DefaultEmbeddingFunction` (all-MiniLM-L6-v2 via ONNX, no PyTorch). Use the same function for chunks and queries.
+- ChromaDB is stored in `rag/chroma_db/` (git-ignored, rebuilt by `index.py`). Each run of `index.py` deletes and recreates the collection. The collection uses cosine distance.
 - `#` lines inside fenced code blocks are not headings.
 - Skip a chunk if every non-blank line starts with `--8<--`, `:::`, `<!--`, or a code fence. Indented lines under a `:::` directive (its options) also count as boilerplate. Log how many were skipped.
 - Code samples are pulled in by `--8<--` includes and are not indexed yet. List this under known limitations.
@@ -31,7 +33,7 @@ ChromaDB, Streamlit. LLM and deployment target: TBD.
 
 - Public documents only. Never use employer or clinical data.
 - Never read, open, or edit `.env` files, `.streamlit/secrets.toml`, or any other file that holds credentials. Never commit API keys. If a key is needed, tell me and I will set it up myself.
-- Run scripts from the project root so relative paths resolve.
+- The app lives in `rag/`. Build file paths from the script's location (`Path(__file__).parent`) so scripts run from the project root or from `rag/`.
 
 ## Task list
 
