@@ -1,7 +1,7 @@
 # Document Q&A with RAG
 
 A retrieval-augmented Q&A app over the public docs of Powertools for AWS Lambda (Python).
-Portfolio project for AI ops / solutions engineer roles. The goal is a deployed, measured system.
+Portfolio project for AI ops / solutions engineer/ AI engineer roles. The goal is a deployed, measured system.
 
 ## How to work with me
 

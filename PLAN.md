@@ -14,8 +14,8 @@
 
 ## Step 3: Build the RAG answer generation pipeline
 - [x] Implement a semantic search function that retrieves the top 3 chunks for a user question.
-- [ ] Build a RAG prompt instructing the LLM to answer using only retrieved context and cite sources with bracketed labels.
-- [ ] Create the Streamlit interface with a question input, generated answer, source list, and expandable retrieved context.
+- [x] Build a RAG prompt instructing the LLM to answer using only retrieved context and cite sources with bracketed labels.
+- [x] Create the Streamlit interface with a question input, generated answer, source list, and expandable retrieved context.
 
 ## Step 4: Add logging and evaluate the system
 - [ ] Log each interaction to a JSONL file: timestamp, question, retrieved source IDs, scores, and the generated answer.
@@ -32,10 +32,12 @@
   - [ ] Add a "What broke" section: empty `api_doc/` chunks (`:::` stubs), code samples missing behind `--8<--` includes, and what was done about each.
 
 ## Stretch goals (only after the five steps)
-- [ ] Use Claude as the generation model.
+Ordered for AI engineer roles first; each still helps for solutions/AI ops roles.
+- [ ] FastAPI endpoint and Dockerfile.
+- [ ] Compare Haiku 5.5 vs Opus 5.5 on the eval set: answer quality, refusal accuracy, cost and latency per query.
 - [ ] Lightweight graph-expanded retrieval from markdown links, compared against baseline SourceHitRate@3.
 - [ ] Make the docs folder a setting so the pipeline runs on any corpus.
-- [ ] FastAPI endpoint and Dockerfile.
+- [x] Use Claude as the generation model. (Done in Step 3: Claude Haiku 5.5.)
 
 ## Current status
 - Step 1 done: `chunks.jsonl` has 1,038 chunks from 54 files (average 83 words).
@@ -43,4 +45,8 @@
 - Test query "How do I add a correlation ID to my logs?" returned 3 core/logger.md correlation-ID chunks (distance 0.38-0.45).
 - Step 3: `search(question, k=3)` in rag/search.py returns id, source, section, text, score (cosine similarity).
 - LLM chosen: Claude Haiku 5.5. Prompt design chosen: numbered [1] [2] [3] labels, exact "I don't know based on the Powertools docs." refusal (see CLAUDE.md). anthropic + python-dotenv installed; key loads from .env.
-- Next: create rag/answer.py with SYSTEM_PROMPT + build_context(hits); print the prompt for the test question before calling Claude. Draft system prompt wording is pending approval.
+- rag/answer.py: SYSTEM_PROMPT (Option B: 5 rules, no outside knowledge, partial answers allowed, <150 words) + build_context(hits). answer(question) calls Haiku 5.5 at effort low, returns answer, hits, stop_reason, input/output tokens.
+- Test question answered with correct [1]-[3] citations; said code examples aren't shown (the --8<-- limitation). ~1,140 in / 158 out tokens, ~$0.0002.
+- Step 3 done: rag/app.py (Streamlit) shows answer, sources with scores, and expandable chunk text. Run from rag/: `streamlit run app.py`.
+- Known issue for Step 4: Streamlit reruns on every widget interaction (e.g. opening an expander), which re-calls Claude; fix with caching before adding logging.
+- Next: Step 4 JSONL logging.
